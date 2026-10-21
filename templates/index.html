@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block body_class %}home{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="wrap hero-grid">
+        <div class="hero-copy">
+            <p class="eyebrow">v{{ config.extra.version }} · MIT · Linux server, macOS or Linux laptop</p>
+            <h1>No-downtime deploys on bare metal.</h1>
+            <p class="lead">Buy a server, install Vela, deploy from your laptop over SSH. One binary does both ends. No containers, no orchestrator, no platform bill: the new release takes traffic only after its health check passes.</p>
+            <div class="install">
+                <code id="install-cmd">{{ config.extra.install }}</code>
+                <button type="button" class="copy" data-copy="install-cmd">Copy</button>
+            </div>
+            <p class="actions">
+                <a class="btn btn-primary" href="/getting-started/">Get started</a>
+                <a class="btn btn-ghost" href="{{ config.extra.github }}">View on GitHub</a>
+            </p>
+        </div>
+
+        <figure class="deploy" id="deploy" data-step="5" aria-labelledby="deploy-caption">
+            <div class="term">
+                <div class="term-bar">
+                    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="mono">~/my-app</span>
+                    <button type="button" class="replay" id="replay" hidden>Replay</button>
+                </div>
+<pre class="term-body"><code><span class="ln" data-at="0"><span class="prompt">$</span> vela deploy ./target/release/my-app</span>
+<span class="ln" data-at="1">deploying my-app to root@203.0.113.7</span>
+<span class="ln" data-at="1">  uploading artifact...</span>
+<span class="ln" data-at="2">  activating...</span>
+<span class="ln" data-at="5">deployed my-app to root@203.0.113.7</span></code></pre>
+            </div>
+            <div class="box">
+                <p class="box-head mono"><span>203.0.113.7</span><span class="muted">vela serve</span></p>
+                <div class="proxy mono"><span class="label">proxy :443</span> my-app.example.com</div>
+                <div class="inst old">
+                    <span class="wire" aria-hidden="true"></span>
+                    <span class="mono">:10001 <span class="muted">release 20261018-0912</span></span>
+                    <span class="badge" data-s0="live" data-s1="live" data-s2="live" data-s3="live" data-s4="draining 5s" data-s5="stopped">stopped</span>
+                </div>
+                <div class="inst new">
+                    <span class="wire" aria-hidden="true"></span>
+                    <span class="mono">:10002 <span class="muted">release 20261021-1430</span></span>
+                    <span class="badge" data-s0="" data-s1="uploading" data-s2="starting" data-s3="GET /health → 200" data-s4="live" data-s5="live">live</span>
+                </div>
+            </div>
+            <ol class="steps">
+                <li data-n="1">Upload</li>
+                <li data-n="2">Start on a fresh port</li>
+                <li data-n="3">Health check</li>
+                <li data-n="4">Swap the proxy</li>
+                <li data-n="5">Drain the old release</li>
+            </ol>
+            <figcaption id="deploy-caption" class="muted">One <code>vela deploy</code>: the old release serves every request until the new one has answered its health check.</figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="proof">
+    <div class="wrap proof-row">
+        <span class="muted">In production</span>
+        <span><a href="https://app.cyanea.bio">app.cyanea.bio</a> <span class="muted">Phoenix, sequential</span></span>
+        <span><a href="https://app.archipelag.io">app.archipelag.io</a> <span class="muted">Phoenix, blue-green</span></span>
+    </div>
+</section>
+
+<section class="band">
+    <div class="wrap">
+        <header class="section-head">
+            <p class="eyebrow">What a deploy does</p>
+            <h2>The old release keeps serving until the new one proves itself.</h2>
+        </header>
+        <ol class="lifecycle">
+            <li><h3>Upload</h3><p>The client tars your binary or BEAM release and copies it with <code>scp</code>. The server unpacks it into a new, read-only release directory.</p></li>
+            <li><h3>Start on a fresh port</h3><p>Vela runs <code>pre_start</code> (your migrations), then starts the new release on a random port between 10000 and 20000 with <code>PORT</code> and <code>VELA_DATA_DIR</code> set.</p></li>
+            <li><h3>Health check</h3><p>It asks your health path up to 30 times, a second apart. Anything but a 200 kills the new instance; the old one never noticed.</p></li>
+            <li><h3>Swap the proxy</h3><p>The built-in proxy points the domain at the new port and the <code>current</code> symlink moves. Requests in flight finish where they started.</p></li>
+            <li><h3>Drain the old release</h3><p>The old instance gets <code>drain</code> seconds, then <code>SIGTERM</code>, then <code>SIGKILL</code>. The last five releases stay on disk for <code>vela rollback</code>.</p></li>
+        </ol>
+    </div>
+</section>
+
+<section class="band band-alt">
+    <div class="wrap">
+        <header class="section-head">
+            <p class="eyebrow">Two strategies</p>
+            <h2>Overlap when you can, take turns when you write to SQLite.</h2>
+        </header>
+        <div class="strategies">
+            <div class="strategy">
+                <h3>Blue-green <span class="muted">default</span></h3>
+                <div class="lanes" role="img" aria-label="Blue-green: the new instance starts while the old one runs; after the health check passes, traffic swaps and the old one drains.">
+                    <div class="lane"><span class="lane-name">old</span><span class="bar bar-old" style="--from:0%;--to:62%"></span><span class="bar bar-drain" style="--from:62%;--to:74%"></span></div>
+                    <div class="lane"><span class="lane-name">new</span><span class="bar bar-check" style="--from:40%;--to:62%"></span><span class="bar bar-new" style="--from:62%;--to:100%"></span></div>
+                    <span class="mark" style="--at:0.62">swap</span>
+                </div>
+                <p>Both instances run for a moment, so no request ever finds nothing listening. Use it for anything that keeps its state elsewhere.</p>
+            </div>
+            <div class="strategy">
+                <h3>Sequential</h3>
+                <div class="lanes" role="img" aria-label="Sequential: the old instance stops, then the new one starts; a sub-second gap.">
+                    <div class="lane"><span class="lane-name">old</span><span class="bar bar-old" style="--from:0%;--to:55%"></span></div>
+                    <div class="lane"><span class="lane-name">new</span><span class="bar bar-check" style="--from:57%;--to:66%"></span><span class="bar bar-new" style="--from:66%;--to:100%"></span></div>
+                    <span class="mark" style="--at:0.56">sub-second gap</span>
+                </div>
+                <p>The old instance stops before the new one opens the database, so two writers never share a SQLite file. Your data directory survives every deploy.</p>
+            </div>
+        </div>
+        <p class="legend muted"><span class="key key-live"></span> serving <span class="key key-check"></span> health checking <span class="key key-drain"></span> draining</p>
+    </div>
+</section>
+
+<section class="band">
+    <div class="wrap">
+        <header class="section-head">
+            <p class="eyebrow">In the binary</p>
+            <h2>The parts you would otherwise glue together.</h2>
+        </header>
+        <dl class="features">
+            <div><dt>Reverse proxy</dt><dd>Routes by domain, passes WebSockets through, redirects HTTP to HTTPS. Built on hyper, inside the daemon.</dd></div>
+            <div><dt>TLS by itself</dt><dd>Let's Encrypt over ACME HTTP-01, renewed 30 days before expiry. Or a Cloudflare Origin certificate, with optional mTLS for Authenticated Origin Pulls.</dd></div>
+            <div><dt>SSH as the control plane</dt><dd>The client runs <code>scp</code> and <code>ssh</code> with the keys you already have. No tokens, no deploy API to secure.</dd></div>
+            <div><dt>Rust and Elixir</dt><dd>Compiled binaries or BEAM releases. When cross-compiling is a pain, <code>remote = true</code> builds on the server from <code>git archive</code>.</dd></div>
+            <div><dt>Postgres and NATS</dt><dd>Declare them in <code>Vela.toml</code>. Vela installs and provisions them and injects <code>DATABASE_URL</code> or <code>NATS_URL</code>.</dd></div>
+            <div><dt>Secrets and rollback</dt><dd>Per-app secrets in a mode 0600 file, referenced as <code>${secret:KEY}</code>. <code>vela rollback</code> goes back one release.</dd></div>
+            <div><dt>Backups</dt><dd>Scheduled copies of app data, secrets and <code>pg_dump</code> output, to a local path or S3. SQLite is checkpointed first.</dd></div>
+            <div><dt>Supervision</dt><dd>Restarts apps that crash and restores them when the daemon restarts. <code>vela setup</code> writes a hardened systemd unit.</dd></div>
+            <div><dt>Status and logs</dt><dd><code>vela status --json</code> probes every health path live; <code>vela logs my-app -f</code> tails output from your laptop.</dd></div>
+        </dl>
+    </div>
+</section>
+
+<section class="band band-alt">
+    <div class="wrap split">
+        <div>
+            <p class="eyebrow">Vela.toml</p>
+            <h2>One file in your repo.</h2>
+{{ '```toml
+[app]
+name = "my-app"
+domain = "my-app.example.com"
+
+[deploy]
+server = "root@your-server.example.com"
+type = "binary"              # or "beam" for Elixir
+binary = "my-app"
+health = "/health"
+strategy = "blue-green"      # or "sequential" for SQLite apps
+pre_start = "bin/migrate"    # failure aborts the deploy
+
+[env]
+DATABASE_PATH = "${data_dir}/my-app.db"
+SECRET_KEY_BASE = "${secret:SECRET_KEY_BASE}"
+
+[services.postgres]
+version = "17"
+databases = ["my_app_prod"]
+```' | markdown | safe }}
+            <p><a href="/configuration/">Every option, and server.toml →</a></p>
+        </div>
+        <div>
+            <p class="eyebrow">Your app</p>
+            <h2>Four things it has to do.</h2>
+            <ol class="contract">
+                <li><strong>Listen on <code>$PORT</code>.</strong> Vela picks the port; read it from the environment.</li>
+                <li><strong>Answer its health path.</strong> Return 200 within 30 seconds of starting.</li>
+                <li><strong>Shut down on <code>SIGTERM</code>.</strong> Finish what you are doing; <code>SIGKILL</code> follows after a timeout.</li>
+                <li><strong>Keep files in <code>$VELA_DATA_DIR</code>.</strong> Databases and uploads there survive every deploy; release directories are read-only.</li>
+            </ol>
+        </div>
+    </div>
+</section>
+
+<section class="band">
+    <div class="wrap split">
+        <div>
+            <p class="eyebrow">Scope</p>
+            <h2>One server, on purpose.</h2>
+            <p>Vela deploys to a single machine. It does not schedule across a cluster, and it is not trying to. If one good server runs your product, Vela is the whole platform.</p>
+        </div>
+        <div>
+            <p class="eyebrow">Next</p>
+            <h2>Isolation between apps.</h2>
+            <p>Apps on the same server are not yet separated by Linux namespaces or cgroups, and memory and CPU limits in <code>[resources]</code> are not enforced yet. Process isolation and resource limits are the next milestones. Follow along in <a href="{{ config.extra.releases }}">the releases</a>.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="wrap cta-inner">
+        <h2>Your first deploy takes about ten minutes.</h2>
+        <p class="actions">
+            <a class="btn btn-primary" href="/getting-started/">Get started</a>
+            <a class="btn btn-ghost" href="{{ config.extra.docs }}">Read the docs</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Play the deploy once on load. The markup rests on the finished state, so the page is
+    // complete without JavaScript and with reduced motion.
+    (function () {
+        var fig = document.getElementById("deploy"), replay = document.getElementById("replay");
+        if (!fig || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var waits = [700, 1000, 1100, 1300, 1300, 1400], timer = null;
+        function show(step) {
+            fig.dataset.step = step;
+            fig.querySelectorAll(".badge").forEach(function (b) { b.textContent = b.dataset["s" + step]; });
+        }
+        function play() {
+            clearTimeout(timer);
+            replay.hidden = true;
+            var step = 0;
+            show(0);
+            (function next() {
+                timer = setTimeout(function () {
+                    step += 1;
+                    show(step);
+                    if (step < 5) next(); else replay.hidden = false;
+                }, waits[step]);
+            })();
+        }
+        replay.addEventListener("click", play);
+        play();
+    })();
+</script>
+{% endblock %}

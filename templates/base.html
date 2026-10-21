@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    {%- block meta %}
+    {%- if page.title %}{% set page_title = page.title ~ " · " ~ config.title %}
+    {%- elif section.title and not section.path == "/" %}{% set page_title = section.title ~ " · " ~ config.title %}
+    {%- else %}{% set page_title = config.title ~ ": " ~ config.extra.pitch %}{% endif %}
+    {%- set page_description = page.description | default(value=section.description | default(value=config.description)) %}
+    {%- set page_url = page.permalink | default(value=section.permalink | default(value=config.base_url)) %}
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_description }}">
+    <meta name="keywords" content="{{ config.extra.keywords }}">
+    <link rel="canonical" href="{{ page_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config.title }}">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ page_description }}">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:image" content="{{ get_url(path='img/og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    {%- endblock meta %}
+    <meta name="theme-color" content="#F7F9FB" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0B1120" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="{{ get_url(path='favicon.ico') }}" sizes="48x48">
+    <link rel="icon" href="{{ get_url(path='img/logo.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ get_url(path='favicon.png') }}" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ get_url(path='apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ get_url(path='site.webmanifest') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="{{ get_url(path='style.css', cachebust=true) }}">
+    <script>
+        // Apply a stored theme choice before first paint; otherwise follow the system.
+        (function () {
+            try {
+                var t = localStorage.getItem("theme");
+                if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="wrap header-row">
+            <a class="brand" href="{{ get_url(path='/') }}"><img src="{{ get_url(path='img/logo.svg') }}" alt="" width="28" height="28">Vela</a>
+            <nav class="nav" aria-label="Main">
+                {%- for link in config.extra.nav_links %}
+                <a href="{{ link.url }}"{% if current_path and current_path is starting_with(link.url) %} aria-current="page"{% endif %}>{{ link.name }}</a>
+                {%- endfor %}
+                <a href="{{ config.extra.github }}">GitHub</a>
+                <button class="theme-toggle" type="button" aria-label="Switch between light and dark theme" onclick="toggleTheme()">
+                    <svg class="icon-sun" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap footer-grid">
+            <div class="footer-brand">
+                <a class="footer-logo" href="{{ get_url(path='/') }}" aria-label="Vela home">
+                    <img src="{{ get_url(path='img/logo.svg') }}" alt="" width="40" height="40" loading="lazy">
+                    <span>Vela</span>
+                </a>
+                <p class="muted">No-downtime app deployment on bare metal. Free and open source under the MIT license.</p>
+            </div>
+            <nav class="footer-col" aria-label="Learn">
+                <p class="footer-head">Learn</p>
+                <a href="/getting-started/">Getting started</a>
+                <a href="/configuration/">Configuration</a>
+                <a href="{{ config.extra.docs }}/production-checklist.md">Production checklist</a>
+                <a href="{{ config.extra.docs }}/elixir-phoenix.md">Elixir and Phoenix</a>
+            </nav>
+            <nav class="footer-col" aria-label="Project">
+                <p class="footer-head">Project</p>
+                <a href="{{ config.extra.github }}">GitHub</a>
+                <a href="{{ config.extra.releases }}">Releases</a>
+                <a href="{{ config.extra.docs }}/architecture.md">Architecture</a>
+                <a href="https://raskell.io/projects/">More from raskell.io</a>
+            </nav>
+        </div>
+        <div class="wrap footer-base">
+            <span>© {{ now() | date(format="%Y") }} raskell.io · MIT license</span>
+            <span class="mono muted">v{{ config.extra.version }}</span>
+        </div>
+    </footer>
+    <script>
+        document.querySelectorAll("[data-copy]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var text = document.getElementById(btn.dataset.copy).textContent;
+                navigator.clipboard.writeText(text).then(function () {
+                    btn.textContent = "Copied";
+                    setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+                }, function () {
+                    var range = document.createRange();
+                    range.selectNodeContents(document.getElementById(btn.dataset.copy));
+                    var sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+                });
+            });
+        });
+        function toggleTheme() {
+            var root = document.documentElement;
+            var current = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            var next = current === "dark" ? "light" : "dark";
+            root.dataset.theme = next;
+            try { localStorage.setItem("theme", next); } catch (e) {}
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

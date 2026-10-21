@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- Social card source, 1200x630. scripts/render-icons.sh renders it to static/img/og-image.png. -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=block">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; background: #0F172A; color: #F8FAFC; font-family: "Archivo", sans-serif; overflow: hidden; }
+  .card { box-sizing: border-box; height: 100%; padding: 72px 80px; display: grid; grid-template-rows: auto 1fr auto; }
+  .brand { display: flex; align-items: center; gap: 22px; font-weight: 760; font-stretch: 125%; font-size: 44px; }
+  .brand img { width: 76px; height: 76px; border-radius: 16px; box-shadow: 0 0 0 1px #1E293B; }
+  h1 { margin: 0; align-self: center; font-weight: 760; font-stretch: 125%; font-size: 76px; line-height: 1.04; letter-spacing: -0.02em; max-width: 960px; }
+  .row { display: flex; justify-content: space-between; align-items: end; font-family: "JetBrains Mono", monospace; font-size: 26px; color: #94A3B8; }
+  .row b { color: #2DD4BF; font-weight: 500; }
+  .steps { display: flex; gap: 10px; }
+  .steps i { display: block; width: 46px; height: 6px; border-radius: 3px; background: #2DD4BF; }
+</style>
+<div class="card">
+  <div class="brand"><img src="../static/img/logo.svg" alt="">Vela</div>
+  <h1>No-downtime deploys on bare metal.</h1>
+  <div class="row"><span><b>$</b> vela deploy ./target/release/my-app</span><span class="steps"><i></i><i></i><i></i><i></i><i></i></span></div>
+</div>

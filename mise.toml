@@ -1,0 +1,25 @@
+# mise configuration for vela.raskell.io
+# https://mise.jdx.dev
+
+[tools]
+zola = "0.22.1"
+
+[tasks.serve]
+description = "Start development server"
+run = "zola serve --drafts"
+
+[tasks.build]
+description = "Build the website into public/"
+run = "zola build"
+
+[tasks.check]
+description = "Build the site and check internal links"
+run = "zola check --skip-external-links"
+
+[tasks.icons]
+description = "Render favicons, app icons and the social card (needs resvg, ImageMagick and Google Chrome)"
+run = "scripts/render-icons.sh"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "rm -rf public"
