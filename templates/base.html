@@ -68,32 +68,63 @@
     </main>
 
     <footer class="site-footer">
-        <div class="wrap footer-grid">
+        <div class="footer-wrap footer-grid">
             <div class="footer-brand">
                 <a class="footer-logo" href="{{ get_url(path='/') }}" aria-label="Vela home">
-                    <img src="{{ get_url(path='img/logo.svg') }}" alt="" width="40" height="40" loading="lazy">
+                    <img src="{{ get_url(path='img/logo.svg') }}" alt="" width="44" height="44" loading="lazy">
                     <span>Vela</span>
                 </a>
-                <p class="muted">No-downtime app deployment on bare metal. Free and open source under the MIT license.</p>
+                <div class="footer-about">
+                    <p>Vela deploys your apps to a server you own, with no downtime and no containers. It is one Rust binary: the daemon on the server, the client on your laptop, SSH in between.</p>
+                    <p>It is built at <a href="https://raskell.io">raskell.io</a>, next to Zentinel and Refrakt, and it deploys the apps behind Cyanea and Archipelag.io.</p>
+                </div>
+                <nav class="youarehere" aria-label="You are here">
+                    <span class="youarehere-label">You are here</span>
+                    <a href="{{ get_url(path='/') }}">Home</a>
+                    {%- if page.title %}<span aria-hidden="true">/</span><a href="{{ page.permalink }}" aria-current="page">{{ page.title }}</a>{% endif %}
+                </nav>
             </div>
-            <nav class="footer-col" aria-label="Learn">
-                <p class="footer-head">Learn</p>
-                <a href="/getting-started/">Getting started</a>
-                <a href="/configuration/">Configuration</a>
-                <a href="{{ config.extra.docs }}/production-checklist.md">Production checklist</a>
-                <a href="{{ config.extra.docs }}/elixir-phoenix.md">Elixir and Phoenix</a>
-            </nav>
-            <nav class="footer-col" aria-label="Project">
-                <p class="footer-head">Project</p>
-                <a href="{{ config.extra.github }}">GitHub</a>
-                <a href="{{ config.extra.releases }}">Releases</a>
-                <a href="{{ config.extra.docs }}/architecture.md">Architecture</a>
-                <a href="https://raskell.io/projects/">More from raskell.io</a>
-            </nav>
+            <div class="footer-groups">
+                <nav class="footer-group" aria-label="Learn">
+                    <span class="footer-head">Learn</span>
+                    <a href="/getting-started/">Getting started</a>
+                    <a href="/configuration/">Configuration</a>
+                    <a href="{{ config.extra.docs }}/deploy-lifecycle.md">Deploy lifecycle</a>
+                    <a href="{{ config.extra.docs }}/production-checklist.md">Production checklist</a>
+                    <a href="{{ config.extra.docs }}/architecture.md">Architecture</a>
+                </nav>
+                <nav class="footer-group" aria-label="Guides">
+                    <span class="footer-head">Guides</span>
+                    <a href="{{ config.extra.docs }}/elixir-phoenix.md">Elixir and Phoenix</a>
+                    <a href="{{ config.extra.docs }}/cloudflare.md">Behind Cloudflare</a>
+                    <a href="{{ config.extra.docs }}">All docs</a>
+                </nav>
+                <nav class="footer-group" aria-label="Project">
+                    <span class="footer-head">Project</span>
+                    <a href="{{ config.extra.github }}">GitHub</a>
+                    <a href="{{ config.extra.releases }}">Releases</a>
+                    <a href="{{ config.extra.github }}/issues">Issues</a>
+                    <a href="{{ config.extra.github }}/blob/main/install.sh">Install script</a>
+                </nav>
+                <nav class="footer-group" aria-label="raskell.io">
+                    <span class="footer-head">raskell.io</span>
+                    <a href="https://raskell.io">raskell.io</a>
+                    <a href="https://raskell.io/projects/">All projects</a>
+                    <a href="https://zentinelproxy.io">Zentinel</a>
+                    <a href="https://refrakt.raskell.io">Refrakt</a>
+                    <a href="https://terrarium.raskell.io">Terrarium</a>
+                </nav>
+            </div>
         </div>
-        <div class="wrap footer-base">
-            <span>© {{ now() | date(format="%Y") }} raskell.io · MIT license</span>
-            <span class="mono muted">v{{ config.extra.version }}</span>
+        <div class="footer-wrap footer-meta">
+            <span>© {{ now() | date(format="%Y") }} raskell.io</span>
+            <span>Code and site MIT</span>
+            <span class="mono">v{{ config.extra.version }}</span>
+            <div class="scheme" role="group" aria-label="Colour scheme">
+                <button type="button" data-scheme="system" aria-pressed="true">System</button>
+                <button type="button" data-scheme="light" aria-pressed="false">Light</button>
+                <button type="button" data-scheme="dark" aria-pressed="false">Dark</button>
+            </div>
         </div>
     </footer>
     <script>
@@ -110,13 +141,23 @@
                 });
             });
         });
-        function toggleTheme() {
+        // Theme: the header toggle flips light and dark; the footer switch also offers System.
+        function setScheme(v) {
             var root = document.documentElement;
-            var current = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-            var next = current === "dark" ? "light" : "dark";
-            root.dataset.theme = next;
-            try { localStorage.setItem("theme", next); } catch (e) {}
+            try { if (v === "system") localStorage.removeItem("theme"); else localStorage.setItem("theme", v); } catch (e) {}
+            if (v === "system") delete root.dataset.theme; else root.dataset.theme = v;
+            paintScheme();
         }
+        function paintScheme() {
+            var cur = document.documentElement.dataset.theme || "system";
+            document.querySelectorAll(".scheme button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.scheme === cur)); });
+        }
+        function toggleTheme() {
+            var current = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            setScheme(current === "dark" ? "light" : "dark");
+        }
+        document.querySelectorAll(".scheme button").forEach(function (b) { b.addEventListener("click", function () { setScheme(b.dataset.scheme); }); });
+        paintScheme();
     </script>
     {% block scripts %}{% endblock %}
 </body>

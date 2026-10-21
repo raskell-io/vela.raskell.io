@@ -2,6 +2,7 @@
 {% block body_class %}home{% endblock %}
 {% block content %}
 <section class="hero">
+    <canvas class="drift" id="drift" aria-hidden="true"></canvas>
     <div class="wrap hero-grid">
         <div class="hero-copy">
             <p class="eyebrow">v{{ config.extra.version }} · MIT · Linux server, macOS or Linux laptop</p>
@@ -18,6 +19,7 @@
         </div>
 
         <figure class="deploy" id="deploy" data-step="5" aria-labelledby="deploy-caption">
+            <p class="fig"><span>Fig. 1</span> One deploy</p>
             <div class="term">
                 <div class="term-bar">
                     <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -28,22 +30,55 @@
 <span class="ln" data-at="1">deploying my-app to root@203.0.113.7</span>
 <span class="ln" data-at="1">  uploading artifact...</span>
 <span class="ln" data-at="2">  activating...</span>
-<span class="ln" data-at="5">deployed my-app to root@203.0.113.7</span></code></pre>
+<span class="ln" data-at="5">deployed my-app to root@203.0.113.7</span><span class="cursor" aria-hidden="true"></span></code></pre>
             </div>
-            <div class="box">
-                <p class="box-head mono"><span>203.0.113.7</span><span class="muted">vela serve</span></p>
-                <div class="proxy mono"><span class="label">proxy :443</span> my-app.example.com</div>
-                <div class="inst old">
-                    <span class="wire" aria-hidden="true"></span>
-                    <span class="mono">:10001 <span class="muted">release 20261018-0912</span></span>
-                    <span class="badge" data-s0="live" data-s1="live" data-s2="live" data-s3="live" data-s4="draining 5s" data-s5="stopped">stopped</span>
-                </div>
-                <div class="inst new">
-                    <span class="wire" aria-hidden="true"></span>
-                    <span class="mono">:10002 <span class="muted">release 20261021-1430</span></span>
-                    <span class="badge" data-s0="" data-s1="uploading" data-s2="starting" data-s3="GET /health → 200" data-s4="live" data-s5="live">live</span>
-                </div>
-            </div>
+
+            <svg class="schematic" viewBox="0 0 560 268" role="img" aria-labelledby="schematic-title">
+                <title id="schematic-title">Requests reach the proxy, which sends them to the live release. During a deploy the laptop uploads the new release, the server health-checks it, then the proxy moves traffic from the old release on port 10001 to the new one on port 10002 and the old one drains.</title>
+                <defs>
+                    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="context-stroke"/></marker>
+                </defs>
+                <g class="frame">
+                    <rect x="214" y="4" width="342" height="260" rx="12"/>
+                    <text x="230" y="24" class="t-label">203.0.113.7 · vela serve</text>
+                </g>
+
+                <path class="wire w-req" d="M172 66 H236" marker-end="url(#arrow)"/>
+                <path class="wire w-old" d="M356 56 H378 V112 H390" marker-end="url(#arrow)"/>
+                <path class="wire w-new" d="M356 78 H366 V196 H390" marker-end="url(#arrow)"/>
+                <path class="wire w-up" d="M172 214 H390" marker-end="url(#arrow)"/>
+
+                <g class="node n-users">
+                    <rect x="4" y="40" width="168" height="52" rx="8"/>
+                    <text x="18" y="61" class="t-label">requests</text>
+                    <text x="18" y="80" class="t-main">my-app.example.com</text>
+                </g>
+                <g class="node n-proxy">
+                    <rect x="238" y="40" width="118" height="52" rx="8"/>
+                    <text x="252" y="61" class="t-label">proxy</text>
+                    <text x="252" y="80" class="t-main">:443 · TLS</text>
+                </g>
+                <g class="node n-old">
+                    <rect x="392" y="86" width="158" height="52" rx="8"/>
+                    <text x="406" y="107" class="t-label">release …0912</text>
+                    <text x="406" y="126" class="t-main">:10001</text>
+                    <text x="538" y="126" class="t-state" text-anchor="end" data-s0="live" data-s1="live" data-s2="live" data-s3="live" data-s4="draining" data-s5="stopped">stopped</text>
+                </g>
+                <g class="node n-new">
+                    <rect x="392" y="176" width="158" height="52" rx="8"/>
+                    <text x="406" y="197" class="t-label">release …1430</text>
+                    <text x="406" y="216" class="t-main">:10002</text>
+                    <text x="538" y="216" class="t-state" text-anchor="end" data-s0="" data-s1="uploading" data-s2="starting" data-s3="200 OK" data-s4="live" data-s5="live">live</text>
+                </g>
+                <g class="node n-laptop">
+                    <rect x="4" y="176" width="168" height="52" rx="8"/>
+                    <text x="18" y="197" class="t-label">your laptop</text>
+                    <text x="18" y="216" class="t-main">scp + ssh</text>
+                </g>
+                <text x="236" y="234" class="t-label t-up">release tarball</text>
+                <text x="358" y="160" class="t-label t-probe" text-anchor="end">GET /health</text>
+            </svg>
+
             <ol class="steps">
                 <li data-n="1">Upload</li>
                 <li data-n="2">Start on a fresh port</li>
@@ -51,7 +86,7 @@
                 <li data-n="4">Swap the proxy</li>
                 <li data-n="5">Drain the old release</li>
             </ol>
-            <figcaption id="deploy-caption" class="muted">One <code>vela deploy</code>: the old release serves every request until the new one has answered its health check.</figcaption>
+            <figcaption id="deploy-caption" class="muted">Requests always flow to a release that has answered its health check. Watch them swing from <code>:10001</code> to <code>:10002</code>.</figcaption>
         </figure>
     </div>
 </section>
@@ -65,11 +100,13 @@
 </section>
 
 <section class="band">
-    <div class="wrap">
+    <div class="wrap railed">
+        <span class="rail" aria-hidden="true"></span>
         <header class="section-head">
             <p class="eyebrow">What a deploy does</p>
             <h2>The old release keeps serving until the new one proves itself.</h2>
         </header>
+        <p class="fig"><span>Fig. 2</span> The deploy sequence</p>
         <ol class="lifecycle">
             <li><h3>Upload</h3><p>The client tars your binary or BEAM release and copies it with <code>scp</code>. The server unpacks it into a new, read-only release directory.</p></li>
             <li><h3>Start on a fresh port</h3><p>Vela runs <code>pre_start</code> (your migrations), then starts the new release on a random port between 10000 and 20000 with <code>PORT</code> and <code>VELA_DATA_DIR</code> set.</p></li>
@@ -81,11 +118,13 @@
 </section>
 
 <section class="band band-alt">
-    <div class="wrap">
+    <div class="wrap railed">
+        <span class="rail" aria-hidden="true"></span>
         <header class="section-head">
             <p class="eyebrow">Two strategies</p>
             <h2>Overlap when you can, take turns when you write to SQLite.</h2>
         </header>
+        <p class="fig"><span>Fig. 3</span> Two instances over time</p>
         <div class="strategies">
             <div class="strategy">
                 <h3>Blue-green <span class="muted">default</span></h3>
@@ -93,6 +132,7 @@
                     <div class="lane"><span class="lane-name">old</span><span class="bar bar-old" style="--from:0%;--to:62%"></span><span class="bar bar-drain" style="--from:62%;--to:74%"></span></div>
                     <div class="lane"><span class="lane-name">new</span><span class="bar bar-check" style="--from:40%;--to:62%"></span><span class="bar bar-new" style="--from:62%;--to:100%"></span></div>
                     <span class="mark" style="--at:0.62">swap</span>
+                    <span class="playhead" aria-hidden="true"></span>
                 </div>
                 <p>Both instances run for a moment, so no request ever finds nothing listening. Use it for anything that keeps its state elsewhere.</p>
             </div>
@@ -102,11 +142,12 @@
                     <div class="lane"><span class="lane-name">old</span><span class="bar bar-old" style="--from:0%;--to:55%"></span></div>
                     <div class="lane"><span class="lane-name">new</span><span class="bar bar-check" style="--from:57%;--to:66%"></span><span class="bar bar-new" style="--from:66%;--to:100%"></span></div>
                     <span class="mark" style="--at:0.56">sub-second gap</span>
+                    <span class="playhead" aria-hidden="true"></span>
                 </div>
                 <p>The old instance stops before the new one opens the database, so two writers never share a SQLite file. Your data directory survives every deploy.</p>
             </div>
         </div>
-        <p class="legend muted"><span class="key key-live"></span> serving <span class="key key-check"></span> health checking <span class="key key-drain"></span> draining</p>
+        <p class="legend muted"><span class="key key-live"></span> serving <span class="key key-check"></span> health checking <span class="key key-drain"></span> draining <span class="key-time">time →</span></p>
     </div>
 </section>
 
@@ -172,17 +213,33 @@ databases = ["my_app_prod"]
 </section>
 
 <section class="band">
-    <div class="wrap split">
+    <div class="wrap split split-scope">
         <div>
             <p class="eyebrow">Scope</p>
             <h2>One server, on purpose.</h2>
             <p>Vela deploys to a single machine. It does not schedule across a cluster, and it is not trying to. If one good server runs your product, Vela is the whole platform.</p>
-        </div>
-        <div>
-            <p class="eyebrow">Next</p>
-            <h2>Isolation between apps.</h2>
+            <h2 class="h2-next">Next: isolation between apps.</h2>
             <p>Apps on the same server are not yet separated by Linux namespaces or cgroups, and memory and CPU limits in <code>[resources]</code> are not enforced yet. Process isolation and resource limits are the next milestones. Follow along in <a href="{{ config.extra.releases }}">the releases</a>.</p>
         </div>
+        <figure class="ascii-fig">
+            <p class="fig"><span>Fig. 4</span> The whole platform</p>
+<pre class="ascii" id="ascii" aria-label="A drawing of one server running the Vela daemon with its proxy, two apps and Postgres.">       .--------------------------------------.
+      /                                      /|
+     +--------------------------------------+ |
+     |  vela serve              :80   :443  | |
+     |  ..................................  | |
+     |  proxy    my-app.example.com  -> 02  | |
+     |  ..................................  | |
+     |  [01] my-app    :10001    stopped    | |
+     |  [02] my-app    :10002    live       | |
+     |  [--] postgres  :5432     up         | |
+     |  ..................................  | |
+     |  /var/vela/apps/my-app/data          | +
+     |                                      |/
+     +--------------------------------------+
+        |                              |
+       ===                            ===</pre>
+        </figure>
     </div>
 </section>
 
@@ -199,31 +256,106 @@ databases = ["my_app_prod"]
 
 {% block scripts %}
 <script>
-    // Play the deploy once on load. The markup rests on the finished state, so the page is
-    // complete without JavaScript and with reduced motion.
+    // Motion for the home page. Everything rests on its finished state, so the page is complete
+    // without JavaScript; with reduced motion none of this runs.
     (function () {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        document.documentElement.classList.add("motion");
+
+        var visible = function (el, cb) {
+            if (!("IntersectionObserver" in window)) { cb(true); return; }
+            new IntersectionObserver(function (entries) { entries.forEach(function (e) { cb(e.isIntersecting); }); }, { threshold: 0.15 }).observe(el);
+        };
+
+        // Fig. 1: play the deploy, hold the finished state, then run it again while it is on screen.
         var fig = document.getElementById("deploy"), replay = document.getElementById("replay");
-        if (!fig || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        var waits = [700, 1000, 1100, 1300, 1300, 1400], timer = null;
+        var waits = [1600, 1700, 1500, 2000, 2000, 4200], timer = null, onScreen = true;
         function show(step) {
             fig.dataset.step = step;
-            fig.querySelectorAll(".badge").forEach(function (b) { b.textContent = b.dataset["s" + step]; });
+            fig.querySelectorAll("[data-s0]").forEach(function (t) { t.textContent = t.getAttribute("data-s" + step); });
         }
         function play() {
             clearTimeout(timer);
-            replay.hidden = true;
             var step = 0;
             show(0);
+            replay.hidden = true;
             (function next() {
                 timer = setTimeout(function () {
+                    if (step === 5) { if (onScreen) play(); else timer = null; return; }
                     step += 1;
                     show(step);
-                    if (step < 5) next(); else replay.hidden = false;
+                    if (step === 5) replay.hidden = false;
+                    next();
                 }, waits[step]);
             })();
         }
         replay.addEventListener("click", play);
+        visible(fig, function (v) { onScreen = v; if (v && timer === null) play(); });
         play();
+
+        // Hero background: a field of characters drifting toward the server.
+        var canvas = document.getElementById("drift"), ctx = canvas.getContext("2d");
+        var cell = 16, cols = 0, rows = 0, streaks = [], ink = "#000", accent = "#000", running = true, last = 0;
+        function colours() {
+            var cs = getComputedStyle(document.documentElement);
+            ink = cs.getPropertyValue("--drift-ink").trim();
+            accent = cs.getPropertyValue("--accent").trim();
+        }
+        function size() {
+            var r = canvas.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+            canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            cols = Math.ceil(r.width / cell); rows = Math.ceil(r.height / cell);
+            streaks = [];
+            for (var i = 0; i < Math.round(rows * 0.9); i++) streaks.push(spawn(true));
+        }
+        function spawn(anywhere) {
+            return { row: Math.floor(Math.random() * rows), x: anywhere ? Math.random() * cols : -Math.random() * 20,
+                     len: 3 + Math.floor(Math.random() * 7), speed: 4 + Math.random() * 8 };
+        }
+        function frame(t) {
+            if (!running) return;
+            var dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
+            var w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.font = "12px 'JetBrains Mono', monospace";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = ink;
+            for (var r = 0; r < rows; r += 2) for (var c = (r / 2) % 2; c < cols; c += 2) ctx.fillText("·", c * cell + 4, r * cell + 8);
+            streaks.forEach(function (s, i) {
+                s.x += s.speed * dt;
+                if (s.x - s.len > cols) streaks[i] = spawn(false);
+                for (var k = 0; k < s.len; k++) {
+                    var x = Math.floor(s.x) - k;
+                    if (x < 0 || x >= cols) continue;
+                    ctx.globalAlpha = k === 0 ? 0.9 : 0.55 * (1 - k / s.len);
+                    ctx.fillStyle = k === 0 ? accent : ink;
+                    ctx.fillText(k === 0 ? ">" : "-", x * cell + 4, s.row * cell + 8);
+                }
+                ctx.globalAlpha = 1;
+            });
+            requestAnimationFrame(frame);
+        }
+        colours(); size();
+        addEventListener("resize", size);
+        new MutationObserver(colours).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        matchMedia("(prefers-color-scheme: dark)").addEventListener("change", colours);
+        visible(canvas, function (v) { var was = running; running = v; if (v && !was) requestAnimationFrame(frame); });
+        requestAnimationFrame(frame);
+
+        // Fig. 4: type the drawing out the first time it scrolls into view.
+        var art = document.getElementById("ascii"), full = art.textContent, typed = false;
+        visible(art, function (v) {
+            if (!v || typed) return;
+            typed = true;
+            var i = 0, step = Math.ceil(full.length / 90);
+            art.textContent = "";
+            (function type() {
+                i = Math.min(full.length, i + step);
+                art.textContent = full.slice(0, i);
+                if (i < full.length) setTimeout(type, 16);
+            })();
+        });
     })();
 </script>
 {% endblock %}
