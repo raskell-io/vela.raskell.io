@@ -26,6 +26,8 @@ anchors = "on"
 [extra]
 pitch = "No-downtime deploys on bare metal"
 version = "0.5.1"
+# Canonical project description (raskell.io data/projects/vela.toml), used in the JSON-LD.
+ld_description = "No-downtime app deployment on bare metal. One binary. No containers. A self-hosted PaaS alternative to Heroku, Fly.io, Coolify, and Kamal. Built in Rust with zero-downtime deploys and a built-in reverse proxy."
 github = "https://github.com/raskell-io/vela"
 docs = "https://github.com/raskell-io/vela/tree/main/docs"
 releases = "https://github.com/raskell-io/vela/releases"

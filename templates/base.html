@@ -23,6 +23,45 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="author" content="Raffael Schneider">
+    <link rel="alternate" type="text/markdown" title="llms.txt" href="{{ get_url(path='llms.txt') }}">
+    {%- if current_path is defined and current_path == "/" %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["SoftwareApplication", "SoftwareSourceCode"],
+          "@id": "{{ config.base_url | safe }}/#software",
+          "name": "{{ config.title }}",
+          "description": {{ config.extra.ld_description | json_encode() | safe }},
+          "url": "{{ config.base_url | safe }}/",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Linux (server); Linux, macOS (client)",
+          "programmingLanguage": "Rust",
+          "softwareVersion": "{{ config.extra.version }}",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "isAccessibleForFree": true,
+          "license": "https://opensource.org/licenses/MIT",
+          "codeRepository": "{{ config.extra.github | safe }}",
+          "sameAs": ["{{ config.extra.github | safe }}", "https://raskell.io/projects/"],
+          "inLanguage": "en",
+          "author": { "@type": "Person", "@id": "https://raskell.io/#person", "name": "Raffael Schneider", "url": "https://raskell.io/" },
+          "creator": { "@type": "Person", "@id": "https://raskell.io/#person", "name": "Raffael Schneider", "url": "https://raskell.io/" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ config.base_url | safe }}/#website",
+          "name": "{{ config.title }}",
+          "url": "{{ config.base_url | safe }}/",
+          "inLanguage": "en",
+          "about": { "@id": "{{ config.base_url | safe }}/#software" },
+          "publisher": { "@id": "https://raskell.io/#person" }
+        }
+      ]
+    }
+    </script>
+    {%- endif %}
     {%- endblock meta %}
     <meta name="theme-color" content="#F7F9FB" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0B1120" media="(prefers-color-scheme: dark)">
@@ -119,6 +158,7 @@
         <div class="footer-wrap footer-meta">
             <span>© {{ now() | date(format="%Y") }} raskell.io</span>
             <span>Code and site MIT</span>
+            <span>By <a href="https://raskell.io/" rel="author">Raffael Schneider</a></span>
             <span class="mono">v{{ config.extra.version }}</span>
             <div class="scheme" role="group" aria-label="Colour scheme">
                 <button type="button" data-scheme="system" aria-pressed="true">System</button>

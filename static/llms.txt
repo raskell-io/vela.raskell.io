@@ -1,0 +1,31 @@
+# Vela
+
+> No-downtime app deployment on bare metal: one binary, no containers.
+
+Vela deploys apps to a Linux server you own, from your laptop, over SSH. The same `vela` binary runs as the daemon on the server (`vela serve`) and as the client on your laptop (`vela deploy`); prebuilt binaries exist for Linux and macOS on amd64 and arm64. It deploys Rust binaries and Elixir (BEAM) releases: it uploads the artifact, starts it on a fresh port, runs a health check, swaps the built-in reverse proxy to the new instance and drains the old one. The proxy handles automatic TLS with Let's Encrypt, including renewal. Deploy strategies are `blue-green` (zero downtime, the default) and `sequential` (for apps with SQLite). There is no Docker, no Kubernetes and no API token: SSH is the control plane. It is for developers who want a self-hosted alternative to platforms such as Heroku, Fly.io, Coolify and Kamal. Vela is written in Rust and is free and open source under the MIT license.
+
+## Links
+
+- [Website](https://vela.raskell.io/): overview of how a deploy works
+- [Getting started](https://vela.raskell.io/getting-started/): install Vela on a Linux server and your laptop, and deploy a first app with zero downtime
+- [Configuration](https://vela.raskell.io/configuration/): every option in Vela.toml and server.toml
+- [Source code](https://github.com/raskell-io/vela): GitHub repository, MIT license
+- [Documentation](https://github.com/raskell-io/vela/tree/main/docs): guides and reference in the repository
+- [Releases](https://github.com/raskell-io/vela/releases): prebuilt binaries
+- [raskell.io projects](https://raskell.io/projects/): Vela in the list of raskell.io projects
+- [Author](https://raskell.io/about/): Raffael Schneider
+
+## Docs
+
+- [Getting Started](https://github.com/raskell-io/vela/blob/main/docs/getting-started.md): set up Vela on a server and deploy your first app
+- [Configuration](https://github.com/raskell-io/vela/blob/main/docs/configuration.md): the Vela.toml project manifest and the server.toml server config
+- [Deploy Lifecycle](https://github.com/raskell-io/vela/blob/main/docs/deploy-lifecycle.md): the sequence every deploy follows, for debugging and for writing apps that work well with Vela
+- [Production Checklist](https://github.com/raskell-io/vela/blob/main/docs/production-checklist.md): what to have in place before deploying to a real server
+- [Architecture](https://github.com/raskell-io/vela/blob/main/docs/architecture.md): how Vela works internally, one binary in two modes
+- [Deploying Elixir/Phoenix Apps](https://github.com/raskell-io/vela/blob/main/docs/elixir-phoenix.md): deploying Phoenix apps as BEAM releases
+- [Cloudflare](https://github.com/raskell-io/vela/blob/main/docs/cloudflare.md): putting Cloudflare in front of a Vela server
+
+## Optional
+
+- [Install script](https://github.com/raskell-io/vela/blob/main/install.sh)
+- [Issues](https://github.com/raskell-io/vela/issues)
